@@ -6,11 +6,11 @@ import {
   createContact,
   updateContact,
 } from "../controllers/contactsControllers.js";
-import validateBody from "../helpers/validateeBody.js";
+import validateBody from "../helpers/validateBody.js";
 import {
-  createContactShema,
+  createContactSchema,
   updateContactSchema,
-} from "../controllers/contactsControllers.js";
+} from "../schemas/contactsSchemas.js";
 
 const contactsRouter = express.Router();
 
@@ -20,7 +20,7 @@ contactsRouter.get("/:id", getOneContact);
 
 contactsRouter.delete("/:id", deleteContact);
 
-contactsRouter.post("/", validateBody(createContactShema), createContact);
+contactsRouter.post("/", validateBody(createContactSchema), createContact);
 
 contactsRouter.put("/:id", validateBody(updateContactSchema), updateContact);
 
