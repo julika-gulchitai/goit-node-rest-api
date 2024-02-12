@@ -31,10 +31,10 @@ export const createContact = async (req, res) => {
 };
 
 export const updateContact = async (req, res) => {
-  const { id } = req.params;
   if (Object.keys(req.body).length === 0) {
     throw HttpError(400, (message = "Body must have at least one field"));
   }
+  const { id } = req.params;
   const result = await contactsService.updateContact(id, req.body);
   if (!result) {
     throw HttpError(404);
