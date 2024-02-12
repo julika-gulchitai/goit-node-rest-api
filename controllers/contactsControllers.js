@@ -1,7 +1,6 @@
 import * as contactsService from "../services/contactsServices.js";
 import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
-import validateBody from "../helpers/validateBody.js";
 
 export const getAllContacts = async (req, res) => {
   const result = await contactsService.listContacts();
@@ -35,6 +34,9 @@ export const createContact = async (req, res) => {
 
 export const updateContact = async (req, res) => {
   const { id } = req.params;
+  if (Object.keys(req.body).length === 0) {
+    throw HttpError(400, "Body must have at least one field");
+  }
   const result = await contactsService.updateContact(id, req.body);
   if (!result) {
     const error = HttpError(404);
