@@ -2,10 +2,10 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-
+import "dotenv/config";
 import contactsRouter from "./routes/contactsRouter.js";
-import { error } from "console";
 
+// dotenv.config();
 const app = express();
 
 app.use(morgan("tiny"));
@@ -23,13 +23,13 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-const DB_HOST =
-  "mongodb+srv://Julia:v75MGr$mab!TJKQ@cluster0.52hzyta.mongodb.net/contacts?retryWrites=true&w=majority";
+const { DB_HOST, PORT = 4000 } = process.env;
 mongoose
   .connect(DB_HOST)
   .then(() => {
-    app.listen(3000, () => {
-      console.log("Server is running. Use our API on port: 3000");
+    console.log("Database connection successful");
+    app.listen(4000, () => {
+      console.log(`Server is running. Use our API on port: ${PORT}`);
     });
   })
   .catch((error) => {
