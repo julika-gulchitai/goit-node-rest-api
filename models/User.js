@@ -28,9 +28,9 @@ const userSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
-contactSchema.post("save", handleSaveError);
-contactSchema.pre("findOneAndUpdate", setUpdateSetting);
-contactSchema.post("findOneAndUpdate", handleSaveError);
+userSchema.post("save", handleSaveError);
+userSchema.pre("findOneAndUpdate", setUpdateSetting);
+userSchema.post("findOneAndUpdate", handleSaveError);
 
 const User = model("user", userSchema);
 export default User;
