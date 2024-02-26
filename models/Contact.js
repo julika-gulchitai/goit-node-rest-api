@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { handleSaveError, setUpdateSetting } from "./hooks.js";
+import { emailRegexp, phoneRegexp } from "../constants/regexp.js";
 
 const contactSchema = new Schema(
   {
@@ -9,13 +10,23 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
+      match: emailRegexp,
+      required: [true, "Set email for contact"],
+      unique: true,
     },
     phone: {
       type: String,
+      required: [true, "Set phone number for contact"],
+      match: phoneRegexp,
+      unique: true,
     },
     favorite: {
       type: Boolean,
       default: false,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
     },
   },
   {

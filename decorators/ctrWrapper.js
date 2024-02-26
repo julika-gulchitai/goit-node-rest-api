@@ -1,5 +1,5 @@
 const ctrWrapper = (ctrl) => {
-  const func = async (rec, res, next) => {
+  const func = async (req, res, next) => {
     try {
       await ctrl(req, res, next);
     } catch (error) {
