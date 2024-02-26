@@ -3,22 +3,51 @@ import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
 
 export const getAllContacts = async (req, res) => {
-  const result = await contactsService.listContacts();
-  res.json(result);
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 10 } = req.query;
+  const skip = limit * (page - 1);
+  const { fav } = req.query;
+
+  if (fav) {
+    const amount = await contactsService.getContactCountByFilter({
+      owner,
+      fav,
+    });
+    const result = await contactsService.getContactByFilter(
+      { owner, fav },
+      { skip, limit }
+    );
+    res.json({ amount, result });
+  } else {
+    const amount = await contactsService.getContactCountByFilter({ owner });
+    const result = await contactsService.getContactByFilter(
+      { owner },
+      { skip, limit }
+    );
+    res.json({ amount, result });
+  }
 };
 
 export const getOneContact = async (req, res) => {
   const { id } = req.params;
-  const result = await contactsService.getContactById(id);
+  const { _id: owner } = req.user;
+  const result = await contactsService.getOneContactByFilter({
+    _id: id,
+    owner,
+  });
   if (!result) {
     throw HttpError(404);
   }
   res.json(result);
 };
 
-export const deleteContact = (req, res) => {
+export const deleteContact = async (req, res) => {
   const { id } = req.params;
-  const result = contactsService.removeContact(id);
+  const { _id: owner } = req.user;
+  const result = await contactsService.removeContactByFilter({
+    _id: id,
+    owner,
+  });
   if (!result) {
     throw HttpError(404);
   }
@@ -26,7 +55,8 @@ export const deleteContact = (req, res) => {
 };
 
 export const createContact = async (req, res) => {
-  const result = await contactsService.addContact(req.body);
+  const { _id: owner } = req.user;
+  const result = await contactsService.addContact({ ...req.body, owner });
   res.status(201).json(result);
 };
 
@@ -35,7 +65,11 @@ export const updateContact = async (req, res) => {
     throw HttpError(400, (message = "Body must have at least one field"));
   }
   const { id } = req.params;
-  const result = await contactsService.updateContact(id, req.body);
+  const { _id: owner } = req.user;
+  const result = await contactsService.updateContactByFilter(
+    { _id: id, owner },
+    req.body
+  );
   if (!result) {
     throw HttpError(404);
   }
@@ -44,7 +78,11 @@ export const updateContact = async (req, res) => {
 
 export const updateStatusContact = async (rec, res) => {
   const { id } = req.params;
-  const result = await contactsService.updateContact(id, req.body);
+  const { _id: owner } = req.user;
+  const result = await contactsService.updateStatusContactByFilter(
+    { _id: id, owner },
+    req.body
+  );
   if (!result) {
     throw HttpError(404);
   }

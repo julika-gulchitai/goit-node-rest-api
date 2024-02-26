@@ -26,6 +26,7 @@ app.use((err, req, res, next) => {
 });
 
 const { DB_HOST, PORT } = process.env;
+
 mongoose
   .connect(DB_HOST)
   .then(() => {

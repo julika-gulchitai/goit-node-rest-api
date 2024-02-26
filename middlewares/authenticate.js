@@ -1,10 +1,24 @@
-import { isValidObjectId } from "mongoose";
+import jwt from "jsonwebtoken";
 import HttpError from "../helpers/HttpError.js";
+import { findUserById } from "../services/userServices.js";
 
-export const authenticate = (req, res, next) => {
-  const { id } = req.params;
-  if (!isValidObjectId(id)) {
-    return next(HttpError(404, `${id} is not valid id`));
+const { JWT_SECRET } = process.env;
+
+export const authenticate = async (req, res, next) => {
+  const { authorization } = req.header;
+  const [bearer, token] = authorization.split(" ");
+  if (bearer !== "Bearer") {
+    return next(HttpError(401, "Not authorized"));
   }
-  next();
+  try {
+    const { id } = jwt.verify(token, JWT_SECRET);
+    const user = await findUserById(id);
+    if (!user || !user.token) {
+      return next(HttpError(401, "Not authorized"));
+    }
+    req.user = user;
+    next();
+  } catch (error) {
+    next(HttpError(401, "Not authorized"));
+  }
 };
