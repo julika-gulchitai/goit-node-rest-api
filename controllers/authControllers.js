@@ -36,7 +36,7 @@ const login = async (req, res) => {
   const payload = {
     id: user._id,
   };
-  const token = jwt.sing(payload, JWT_SECRET, { expiresIn: "24h" });
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
   await authServices.setToken(user._id, token);
   res.json({ token, user: { email, subscription: user.subscription } });
 };
