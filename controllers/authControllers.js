@@ -13,6 +13,7 @@ const register = async (req, res) => {
   if (user) {
     throw HttpError(409, "Email in use");
   }
+
   const newUser = await authServices.signUp(req.body);
 
   res.status(201).json({
