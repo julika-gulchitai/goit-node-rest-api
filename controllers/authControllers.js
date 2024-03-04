@@ -71,13 +71,13 @@ const updateSubscription = async (req, res) => {
 const updateAvatar = async (req, res) => {
   const { _id } = req.user;
   const { path: oldPath, filename } = req.file;
-  const newPath = path.join(path.resolve('pablic', avatarDir), filename)
+  const newPath = path.join(avatarDir, filename)
+  
   await Jimp.read(oldPath)
     .then((av) => {
     return av.resize(250, 250).quality(60).write(newPath)
     }).catch((err) => console.log(err))
-  
-  const avatarURL = path.join(avatarDir, filename);
+
   await fs.rename(oldPath, newPath);
 
   await authServices.setAvatar(_id, newPath);
