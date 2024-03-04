@@ -4,8 +4,14 @@ import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import gravatar from "gravatar";
+import Jimp from jimp;
+import path from 'path'
+import dotenv from 'dotenv'
 
+dotenv.config()
 const { JWT_SECRET } = process.env;
+const avatarDir = 'avatar'
 
 const register = async (req, res) => {
   const { email } = req.body;
@@ -13,8 +19,9 @@ const register = async (req, res) => {
   if (user) {
     throw HttpError(409, "Email in use");
   }
+  const avatarURL = gravatar.url(email, { s: '250'})
 
-  const newUser = await authServices.signUp(req.body);
+  const newUser = await authServices.signUp(req.body, avatarURL);
 
   res.status(201).json({
     username: newUser.username,
@@ -31,6 +38,7 @@ const login = async (req, res) => {
     throw HttpError(401, "Invalid email or password");
   }
   const passwordCompare = await bcrypt.compare(password, user.password);
+  
   if (!passwordCompare) {
     throw HttpError(401, "Invalid email or password");
   }
@@ -60,10 +68,27 @@ const updateSubscription = async (req, res) => {
   res.json({ subscription });
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+  const newPath = path.join(path.resolve('pablic', avatarDir), filename)
+  await Jimp.read(oldPath)
+    .then((av) => {
+    return av.resize(250, 250).quality(60).write(newPath)
+    }).catch((err) => console.log(err))
+  
+  const avatarURL = path.join(avatarDir, filename);
+  await fs.rename(oldPath, newPath);
+
+  await authServices.setAvatar(_id, newPath);
+  res.json({ avatarURL: newPath});
+};
+
 export default {
   register: ctrWrapper(register),
   login: ctrWrapper(login),
   updateSubscription: ctrWrapper(updateSubscription),
   logout: ctrWrapper(logout),
   getCurrent: ctrWrapper(getCurrent),
+  updateAvatar: ctrWrapper(updateAvatar)
 };

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 export const signUp = async (data) => {
   const { password } = data;
-  const hashPassword = await bcrypt.hash(password, 6);
+  const hashPassword = await bcrypt.hash(password, 10);
   return User.create({ ...data, password: hashPassword });
 };
 
