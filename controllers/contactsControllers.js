@@ -1,4 +1,3 @@
-import fs from "fs/promises";
 import * as contactsService from "../services/contactsServices.js";
 import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
@@ -56,12 +55,7 @@ export const deleteContact = async (req, res) => {
 };
 
 export const createContact = async (req, res) => {
-  const { path: oldPath, filename } = req.file;
-  const newPath = path.join(contactsDir, filename);
-  await fs.rename(oldPath, newPath);
-
   const { _id: owner } = req.user;
-  console.log(req.user);
   const result = await contactsService.addContact({ ...req.body, owner });
   res.status(201).json(result);
 };
