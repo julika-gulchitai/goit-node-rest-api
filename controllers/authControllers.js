@@ -6,12 +6,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
 import Jimp from jimp;
-import path from 'path'
-import dotenv from 'dotenv'
+import path from 'path';
+import dotenv from 'dotenv';
+import fs from "fs/promises"
+
 
 dotenv.config()
 const { JWT_SECRET } = process.env;
-const avatarDir = 'avatar'
+const avatarDir = path.resolve('public', 'avatar')
 
 const register = async (req, res) => {
   const { email } = req.body;
@@ -24,7 +26,7 @@ const register = async (req, res) => {
   const newUser = await authServices.signUp(req.body, avatarURL);
 
   res.status(201).json({
-    username: newUser.username,
+    avatarURL: newUser.avatarURL,
     email: newUser.email,
     subscription: newUser.subscription,
   });
@@ -72,7 +74,7 @@ const updateAvatar = async (req, res) => {
   const { _id } = req.user;
   const { path: oldPath, filename } = req.file;
   const newPath = path.join(avatarDir, filename)
-  
+
   await Jimp.read(oldPath)
     .then((av) => {
     return av.resize(250, 250).quality(60).write(newPath)
