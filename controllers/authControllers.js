@@ -1,5 +1,5 @@
 import * as authServices from "../services/authServices.js";
-import { findUser } from "../services/userServices.js";
+import * as userServices from "../services/userServices.js";
 import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
 import bcrypt from "bcrypt";
@@ -34,12 +34,28 @@ const register = async (req, res) => {
   });
 };
 
+const verify = async (req, res) => {
+  const { verificationCode } = req.params;
+  const user = await userServices.findUser({ verificationCode });
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+  await userServices.updateUser(
+    { _id: user._id },
+    { verify: true, verificationCode: "" }
+  );
+  res.json({ message: "Verify success" });
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await findUser({ email });
   if (!user) {
     throw HttpError(401, "Invalid email or password");
+  }
+  if (!user.verify) {
+    throw HttpError(401, "Email not verify");
   }
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
@@ -73,6 +89,7 @@ const updateSubscription = async (req, res) => {
 
 export default {
   register: ctrWrapper(register),
+  verify: ctrWrapper(verify),
   login: ctrWrapper(login),
   updateSubscription: ctrWrapper(updateSubscription),
   logout: ctrWrapper(logout),
