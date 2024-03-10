@@ -5,13 +5,13 @@ export const singupSchema = Joi.object({
   username: Joi.string().required(),
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
-  subscription: Joi.string().valid("starter", "pro", "business").required(),
+  // subscription: Joi.string().valid("starter", "pro", "business").required(),
 });
 
 export const signinSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
-  subscription: Joi.string().valid("starter", "pro", "business"),
+  // subscription: Joi.string().valid("starter", "pro", "business"),
 });
 
 export const subscriptionSchema = Joi.object({

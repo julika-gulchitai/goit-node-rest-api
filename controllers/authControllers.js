@@ -4,8 +4,10 @@ import HttpError from "../helpers/HttpError.js";
 import ctrWrapper from "../decorators/ctrWrapper.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { nanoid } from "nanoid";
+import sendEmail from "../helpers/sendEmail";
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, BASE_URL } = process.env;
 
 const register = async (req, res) => {
   const { email } = req.body;
@@ -13,8 +15,17 @@ const register = async (req, res) => {
   if (user) {
     throw HttpError(409, "Email in use");
   }
+  const verificationCode = nanoid();
 
-  const newUser = await authServices.signUp(req.body);
+  const newUser = await authServices.signUp(...req.body, verificationCode);
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify email",
+    html: `<a target ="_blank" href="${BASE_URL}/api/auth/verify/${verificationCode}">Click to verify email</a>`,
+  };
+
+  await sendEmail(verifyEmail);
 
   res.status(201).json({
     username: newUser.username,
