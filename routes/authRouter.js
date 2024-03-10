@@ -15,7 +15,13 @@ authRouter.post(
   validateBody(singupSchema),
   authControllers.register
 );
-authRouter.get("/verify/:verificationCode", authControllers.verify);
+authRouter.get("/verify/:verificationToken", authControllers.verify);
+authRouter.post(
+  "/verify",
+  validateBody(verifySchema),
+  authControllers.resendVerifyEmail
+);
+
 authRouter.post("/login", validateBody(signinSchema), authControllers.login);
 
 authRouter.get("/current", authenticate, authControllers.getCurrent);

@@ -10,7 +10,6 @@ import ElasticEmail from "@elasticemail/elasticemail-client";
 import nodemailer from "nodemailer";
 const app = express();
 
-import { error } from "console";
 const { UKR_NET_PASSWORD, UKR_NET_EMAIL } = process.env;
 const nodemailerConfig = {
   host: "smtp.ukr.net",

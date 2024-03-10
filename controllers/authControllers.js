@@ -15,14 +15,14 @@ const register = async (req, res) => {
   if (user) {
     throw HttpError(409, "Email in use");
   }
-  const verificationCode = nanoid();
+  const verificationToken = nanoid();
 
-  const newUser = await authServices.signUp(...req.body, verificationCode);
+  const newUser = await authServices.signUp(...req.body, verificationToken);
 
   const verifyEmail = {
     to: email,
     subject: "Verify email",
-    html: `<a target ="_blank" href="${BASE_URL}/api/auth/verify/${verificationCode}">Click to verify email</a>`,
+    html: `<a target ="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click to verify email</a>`,
   };
 
   await sendEmail(verifyEmail);
@@ -35,16 +35,38 @@ const register = async (req, res) => {
 };
 
 const verify = async (req, res) => {
-  const { verificationCode } = req.params;
-  const user = await userServices.findUser({ verificationCode });
+  const { verificationToken } = req.params;
+  const user = await userServices.findUser({ verificationToken });
   if (!user) {
     throw HttpError(404, "User not found");
   }
   await userServices.updateUser(
     { _id: user._id },
-    { verify: true, verificationCode: "" }
+    { verify: true, verificationToken: "null" }
   );
   res.json({ message: "Verify success" });
+};
+
+const resendVerifyEmail = async (req, res) => {
+  const { email } = req.body;
+  const user = await userServices.findUser({ email });
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+  if (user.verify) {
+    throw HttpError(400, "Verification has already been passed");
+  }
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify email",
+    html: `<a target ="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click to verify email</a>`,
+  };
+  await sendEmail(verifyEmail);
+
+  res.json({
+    message: "Verify email send success",
+  });
 };
 
 const login = async (req, res) => {
@@ -90,6 +112,7 @@ const updateSubscription = async (req, res) => {
 export default {
   register: ctrWrapper(register),
   verify: ctrWrapper(verify),
+  resendVerifyEmail: ctrWrapper(resendVerifyEmail),
   login: ctrWrapper(login),
   updateSubscription: ctrWrapper(updateSubscription),
   logout: ctrWrapper(logout),
